@@ -5,21 +5,23 @@ using UnityEngine;
 
 public class FuwaFuwaMovement : MonoBehaviour
 {
-    [SerializeField]Transform rootBone;
+    [SerializeField] Transform rootBone;
     Transform[] bonesTransform;
     float[] bonesLength;
     Vector3[] _lastPos;
     Vector3[] _lastDir;
+    Vector3[] _defDir;
 
     void Start()
     {
-        if (rootBone == null) { rootBone = transform;}
+        if (rootBone == null) { rootBone = transform; }
         bonesTransform = rootBone.transform.GetComponentsInChildren<Transform>();
         bonesLength = new float[bonesTransform.Length];
         _lastPos = new Vector3[bonesTransform.Length];
         _lastDir = new Vector3[bonesTransform.Length];
         _lastForce = new Vector3[bonesTransform.Length];
-        for (int i=1; i< bonesTransform.Length;i++ )
+        _defDir = new Vector3[bonesTransform.Length];
+        for (int i = 1; i < bonesTransform.Length; i++)
         {
             var t = bonesTransform[i];
             var k = 1;
@@ -27,36 +29,34 @@ public class FuwaFuwaMovement : MonoBehaviour
             bonesLength[i] = bonesLength[i - k] + Vector3.Distance(t.parent.position, t.position);
             _lastPos[i] = t.position;
             _lastDir[i] = t.up;
+            _defDir[i] = t.up;
         }
     }
-    
+
     void Update()
     {
-        for(int i= 0; i< bonesTransform.Length;i++)
+        for (int i = 0; i < bonesTransform.Length; i++)
         {
             var t = bonesTransform[i];
             Vector4 forceDir = CaluculateSwingDirection(i);
-            Debug.Log(Vector3.Dot(_lastForce[i], forceDir));
-            if (Vector3.Dot(_lastForce[i] , forceDir) > 0.98f )
+            if(Vector3.Dot(_lastForce[i], forceDir) <0.4f)
             {
-                ReFuwa(-_lastForce[i], i);
-                
+                ReFuwa(-forceDir, i);
             }
             else DoFuwa(forceDir);
         }
     }
-    Vector4 CaluculateSwingDirection( int i )
+    Vector4 CaluculateSwingDirection(int i)
     {
-        Vector3 swingDir = (rootBone.position - _lastPos[i]);
-        swingDir += (rootBone.up - _lastDir[i]) * bonesLength[i];
-        swingDir /= 2;
+        Vector3 swingDir = (bonesTransform[i].position - _lastPos[i]);
+        swingDir += (bonesTransform[i].up - _lastDir[i]) * bonesLength[i];
         Vector4 swingDir4 = -swingDir;
         swingDir4.w = i;
-
         return swingDir4;
     }
     [SerializeField] float bounceness;
-    [SerializeField] float hardness = 0.1f;
+    [SerializeField] AnimationCurve hardness = AnimationCurve.Constant(timeStart: 0f, timeEnd: 1f, value: 1f);
+    [SerializeField] float angleLimit = 90;
     Vector3[] _lastForce;
     void DoFuwa(Vector4 swingDir4)
     {
@@ -65,33 +65,31 @@ public class FuwaFuwaMovement : MonoBehaviour
         var t = bonesTransform[i];
         if (Vector3.Dot(t.up, t.up + forceDir) > 0.999f)
         {
-            _lastForce[i] = swingDir4;
+            _lastPos[i] = t.position;
+            _lastDir[i] = t.up;
+            _lastForce[i] = forceDir;
         }
         DoRotate(forceDir, i);
     }
     void ReFuwa(Vector3 swingDir, int i)
     {
         var t = bonesTransform[i];
-        swingDir *= 0.9f;
-        if (swingDir.sqrMagnitude <= 0.01f)
-        {
-            _lastPos[i] = rootBone.position;
-            _lastDir[i] = rootBone.up;
-            return;
-        }
-        else DoRotate(swingDir, i);
+        //swingDir *= 0.9f;
+        
+        DoRotate(swingDir, i);
     }
     void DoRotate(Vector3 swingDir, int i)
     {
         var t = bonesTransform[i];
-        var stiffness = (1 - hardness) * bonesLength[i] * Time.deltaTime * 10;
-        var targetDir = t.up + swingDir;
-        t.rotation = Quaternion.Slerp(t.rotation, Quaternion.FromToRotation(t.up, t.up + swingDir), stiffness);
-    }
-    async void DelayFuwa()
-    {
-        await Task.Delay(1);
-        await Task.Run(() => DelayFuwa());
+        float hardnessStrength = hardness.Evaluate(bonesLength[i] / bonesLength[bonesLength.Length - 1]);
+        var stiffness = (1 - hardnessStrength) * bonesLength[i] * Time.deltaTime * 10;
+        var axis = Vector3.Cross(t.up , swingDir);
+        var angle = Vector3.Angle(t.up, t.up+ swingDir);
+        var angleTest = Vector3.Angle(_defDir[i], t.up + swingDir);
+        if (angleTest > angleLimit)  angle -= angleTest - angleLimit;
+        var targetRot = Quaternion.AngleAxis(angle, axis) * t.localRotation ;
+        
+        t.localRotation = Quaternion.Slerp(t.localRotation, targetRot, stiffness);
     }
 }
 
