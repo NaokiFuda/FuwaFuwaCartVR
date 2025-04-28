@@ -39,9 +39,12 @@ public class FuwaFuwaMovement : MonoBehaviour
         {
             var t = bonesTransform[i];
             Vector4 forceDir = CaluculateSwingDirection(i);
-            if(Vector3.Dot(_lastForce[i], forceDir) <0.4f)
+            var dotTest = Vector3.Dot(_lastForce[i], forceDir);
+            
+            if (dotTest < 0.1f && Vector3.SqrMagnitude(forceDir) < 0.01f * 0.01f*Time.deltaTime * Time.deltaTime)
             {
-                ReFuwa(-forceDir, i);
+                //ReFuwa(-forceDir, i);
+                //Debug.Log(_lastForce[i]);
             }
             else DoFuwa(forceDir);
         }
@@ -54,6 +57,7 @@ public class FuwaFuwaMovement : MonoBehaviour
         swingDir4.w = i;
         return swingDir4;
     }
+
     [SerializeField] float bounceness;
     [SerializeField] AnimationCurve hardness = AnimationCurve.Constant(timeStart: 0f, timeEnd: 1f, value: 1f);
     [SerializeField] float angleLimit = 90;
