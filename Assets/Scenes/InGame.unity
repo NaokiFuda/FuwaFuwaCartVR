@@ -142,7 +142,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rootBone: {fileID: 0}
   bounceness: 0
-  hardness: 0.1
+  hardness:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.00310559
+      value: 0.04375
+      inSlope: 0.23221152
+      outSlope: 0.23221152
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.16149186
+    - serializedVersion: 3
+      time: 0.9968872
+      value: 0.10300827
+      inSlope: 0.2792387
+      outSlope: 0.2792387
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.1397515
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  angleLimit: 90
 --- !u!1001 &143393572
 PrefabInstance:
   m_ObjectHideFlags: 0

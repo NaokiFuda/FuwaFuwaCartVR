@@ -11,25 +11,32 @@ public class FuwaFuwaMovement : MonoBehaviour
     Vector3[] _lastPos;
     Vector3[] _lastDir;
     Vector3[] _defDir;
+    Quaternion[] _defRot;
 
     void Start()
     {
         if (rootBone == null) { rootBone = transform; }
         bonesTransform = rootBone.transform.GetComponentsInChildren<Transform>();
         bonesLength = new float[bonesTransform.Length];
-        _lastPos = new Vector3[bonesTransform.Length];
-        _lastDir = new Vector3[bonesTransform.Length];
         _lastForce = new Vector3[bonesTransform.Length];
         _defDir = new Vector3[bonesTransform.Length];
-        for (int i = 1; i < bonesTransform.Length; i++)
+        _defRot = new Quaternion[bonesTransform.Length];
+        _lastPos = new Vector3[bonesTransform.Length];
+        _lastDir = new Vector3[bonesTransform.Length];
+        for (int i = 0; i < bonesTransform.Length; i++)
         {
             var t = bonesTransform[i];
-            var k = 1;
-            while (bonesTransform[i - k] != t.parent) k++;
-            bonesLength[i] = bonesLength[i - k] + Vector3.Distance(t.parent.position, t.position);
+            
+            if(i != 0)
+            {
+                var k = 1;
+                while (bonesTransform[i - k] != t.parent) k++;
+                bonesLength[i] = bonesLength[i - k] + Vector3.Distance(t.parent.position, t.position);
+            }
             _lastPos[i] = t.position;
             _lastDir[i] = t.up;
             _defDir[i] = t.up;
+            _defRot[i] = t.localRotation;
         }
     }
 
@@ -59,7 +66,7 @@ public class FuwaFuwaMovement : MonoBehaviour
     }
 
     [SerializeField] float bounceness;
-    [SerializeField] AnimationCurve hardness = AnimationCurve.Constant(timeStart: 0f, timeEnd: 1f, value: 1f);
+    [SerializeField] AnimationCurve hardness = AnimationCurve.Constant(timeStart: 0.05f, timeEnd: 0.3f, value: 1f);
     [SerializeField] float angleLimit = 90;
     Vector3[] _lastForce;
     void DoFuwa(Vector4 swingDir4)
