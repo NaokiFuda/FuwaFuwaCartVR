@@ -141,27 +141,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rootBone: {fileID: 0}
+  movementThreshold: 0.001
   bounceness: 0
   hardness:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: -0.00310559
-      value: 0.04375
-      inSlope: 0.23221152
-      outSlope: 0.23221152
+      time: 0
+      value: 0.1
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.16149186
+      outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.9968872
-      value: 0.10300827
-      inSlope: 0.2792387
-      outSlope: 0.2792387
+      time: 1
+      value: 0.1
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.1397515
+      inWeight: 0.33333334
       outWeight: 0.33333334
     m_PreInfinity: 2
     m_PostInfinity: 2
