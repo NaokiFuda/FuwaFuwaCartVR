@@ -14,7 +14,6 @@ public class FuwaFuwaMovement : MonoBehaviour
     Vector3[] _lastForceDir;
     float[] _lastForce;
     Quaternion[] _defRot;
-    float[] _delta;
     float maxLength;
     [SerializeField] float movementThreshold = 0.001f; // î˜è¨Ç»ìÆÇ´ÇåüèoÇ∑ÇÈÇΩÇﬂÇÃËáíl
 
@@ -26,9 +25,6 @@ public class FuwaFuwaMovement : MonoBehaviour
         _lastForce = new float[bonesTransform.Length];
         _defDir = new Vector3[bonesTransform.Length];
         _defRot = new Quaternion[bonesTransform.Length];
-        //_lastPos = new Vector3[bonesTransform.Length];
-        //_lastDir = new Vector3[bonesTransform.Length];
-        _delta = new float[bonesLength.Length];
         _lastForceDir = new Vector3[bonesLength.Length];
         for (int i = 0; i < bonesTransform.Length; i++)
         {
@@ -60,10 +56,10 @@ public class FuwaFuwaMovement : MonoBehaviour
             //var dotTest = Vector3.Dot(t.up, t.up + forceDir);
             bool isNotMoving = force < movementThreshold;
 
-            var dotTest = Vector3.Dot(_lastDir, forceDir);
-            //Debug.Log(_lastForce[i].sqrMagnitude);
+            var dotTest = Vector3.Dot(_lastDir, forceDir+ rootBone.up);
+            if (dotTest < 0f) { Debug.Log(dotTest); _lastForce[i] = 0;  }
             
-            if (isNotMoving && _lastForce[i] >0.01f)
+            if (isNotMoving && _lastForce[i] >=0.4f)
             {
                 //_lastForce[i] = Mathf.Max(0,_lastForce[i] - 0.01f);
 
@@ -73,7 +69,6 @@ public class FuwaFuwaMovement : MonoBehaviour
             else
             {
                 _lastForce[i] += force;
-                if (dotTest < 0f) _lastForce[i] = 0;
                 _lastForce[i] = Mathf.Min(0.4f, _lastForce[i]);
                 //Debug.Log(_lastForce[i] + " " + i);
                 //if (i == 1) Debug.Log(_lastForce[i]);
@@ -105,7 +100,7 @@ public class FuwaFuwaMovement : MonoBehaviour
         var i = (int)swingDir4.w;
         var t = bonesTransform[i];
 
-        t.localRotation =CaluculateRotate(swingDir4, i) ;
+        t.localRotation = CaluculateRotate(swingDir4, i) ;
     }
     //[SerializeField , Range(0,1)] float returnPow= 1;
     float _deltaAdd = 0.1f;
@@ -117,17 +112,18 @@ public class FuwaFuwaMovement : MonoBehaviour
         //if (Vector3.Dot(_dotTest, t.forward) < 0) { swingDir *= -1; }
         var returnRot = Quaternion.RotateTowards(t.localRotation, _defRot[i], _deltaAdd);
         //swingDir = swingDir ;
-        t.localRotation = CaluculateRotate( swingDir, i);
+        
+        t.localRotation = CaluculateRotate( swingDir, i );
     }
-    Quaternion CaluculateRotate(Vector3 swingDir, int i)
+    Quaternion CaluculateRotate(Vector3 swingDir, int i )
     {
         var t = bonesTransform[i];
+        var axis = Vector3.Cross(t.up, t.up+ swingDir);
         float hardnessStrength = hardness.Evaluate(bonesLength[i] / maxLength);
-        var axis = Vector3.Cross(t.up , swingDir);
         var angle = Vector3.SignedAngle(t.up, t.up + swingDir, axis);
-        var angleTest = Vector3.SignedAngle(_defDir[i], t.up + swingDir, axis);
+        var angleTest = Vector3.SignedAngle(rootBone.parent.rotation * _defDir[i], t.up + swingDir, axis);
         if (Mathf.Abs(angleTest) > angleLimit)  angle -= Mathf.Sign(angleTest)* (Mathf.Abs(angleTest) - angleLimit);
-        var targetRot = Quaternion.AngleAxis(angle, axis) * t.localRotation ;
+        var targetRot = Quaternion.AngleAxis(angle, axis) * t.localRotation;
 
         return Quaternion.Slerp(t.localRotation, targetRot, hardnessStrength);
     }
