@@ -106,26 +106,21 @@ public class FuwaFuwaMovement : MonoBehaviour
     }
     Quaternion CaluculateRotate(Vector3 swingDir, int i )
     {
-        var t = bonesTransform[i];
+        Transform t = bonesTransform[i];
 
-        var currentUp = t.up;
-        var targetDir = t.up + swingDir;
+        Vector3 currentUp = t.up;
+        Vector3 targetDir = t.up + swingDir;
         Vector3 axis = Vector3.Cross(currentUp, targetDir).normalized;
-        if (axis.magnitude < 0.001f)
-        {
-            axis = Vector3.Cross(currentUp, t.right).normalized;
-            if (axis.magnitude < 0.001f)
-            {
-                axis = t.forward;
-            }
-        }
         float hardnessStrength = hardness.Evaluate(bonesLength[i] / maxLength);
-        var angle = Vector3.SignedAngle(t.up, t.up + swingDir, axis);
-        var angleTest = Vector3.SignedAngle(rootBone.parent.rotation * _defDir[i], t.up + swingDir, axis);
+        float angle = Vector3.SignedAngle(t.up, t.up + swingDir, axis);
+        float angleTest = Vector3.SignedAngle(rootBone.parent.rotation * _defDir[i], t.up + swingDir, axis);
         if (Mathf.Abs(angleTest) > angleLimit)  angle -= Mathf.Sign(angleTest)* (Mathf.Abs(angleTest) - angleLimit);
-        var targetRot = Quaternion.AngleAxis(angle, axis) * t.localRotation;
-
-        return Quaternion.Slerp(t.localRotation, targetRot, hardnessStrength);
+        Quaternion fixedTwist =  _defRot[i]* Quaternion.Inverse(t.localRotation);
+        fixedTwist.x = 0; fixedTwist.z = 0;
+        Quaternion fixedCurrentRot = fixedTwist * t.localRotation;
+        Quaternion targetRot = Quaternion.AngleAxis(angle, axis) * fixedCurrentRot;
+        
+        return Quaternion.Slerp(fixedCurrentRot, targetRot, hardnessStrength);
     }
 }
 
