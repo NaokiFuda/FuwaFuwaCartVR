@@ -141,8 +141,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rootBone: {fileID: 0}
-  movementThreshold: 0.001
-  _deltaAdd: 0
+  _deltaAdd: 0.001
   _tolerate: 0.5
   _maxForce: 0
   bounceness: 0

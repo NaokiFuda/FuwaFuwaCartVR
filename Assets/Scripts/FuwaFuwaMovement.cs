@@ -16,7 +16,6 @@ public class FuwaFuwaMovement : MonoBehaviour
     float[] _delta;
     Quaternion[] _defRot;
     float maxLength;
-    [SerializeField] float movementThreshold = 0.001f; 
 
     void Start()
     {
@@ -55,16 +54,17 @@ public class FuwaFuwaMovement : MonoBehaviour
     {
         Vector3 forceDir = CaluculateSwingDirection();
         float force = forceDir.magnitude;
-        bool isNotMoving = force < movementThreshold;
 
         for (int i = 0; i < bonesTransform.Length; i++)
         {
             var t = bonesTransform[i];
 
             if (bonesLength[i] != 0)_lastForce[i] += force / bonesLength[i] *100;
-            else _lastForce[i] = force;
-            var forceGap = _maxForce - _lastForce[i];
-            if (_lastForce[i] < _maxForce) _lastForce[i] = Mathf.Lerp(_lastForce[i], _maxForce, forceGap / bonesLength[i] * 100);
+            else _lastForce[i] += force;
+
+            float forceGap = _maxForce - _lastForce[i];
+            float fixedGap = forceGap / bonesLength[i] * 100;
+            if (_lastForce[i] < _maxForce) _lastForce[i] = Mathf.Lerp(_lastForce[i], _maxForce, fixedGap);
             
             _lastForce[i] = Mathf.Min(_tolerate, _lastForce[i]);
             _maxForce = Mathf.Max(_maxForce, _lastForce[i]);
@@ -73,11 +73,14 @@ public class FuwaFuwaMovement : MonoBehaviour
             DoFuwa(forceDir4);
             _lastForceDir[i] = _defDir[i] - t.up;
 
-            if (!isNotMoving) _delta[i] = _lastForce[i];
-            _delta[i] = Mathf.Max(0, _delta[i] - 0.1f);
-            //if (_delta[i] == 0) _lastForce[i] = 0;
+            if (_maxForce - _lastForce[i] > 0.001f) { _delta[i] = _lastForce[i]/2;  }
+            else
+            {
+                _delta[i] = Mathf.Max(0, _delta[i] - 0.01f / bonesLength[i] * 100);
+                if (_delta[i] == 0) _lastForce[i] = 0;
 
-            ReFuwa(_delta[i] * _lastForceDir[i], i, _deltaAdd);
+                ReFuwa(_delta[i] * _lastForceDir[i], i, _deltaAdd);
+            }
 
             _lastPos = rootBone.position;
             _lastDir = rootBone.up;
@@ -106,10 +109,11 @@ public class FuwaFuwaMovement : MonoBehaviour
     
     void ReFuwa(Vector3 swingDir, int i , float deltaTime)
     {
-        var t = bonesTransform[i];
-        var returnRot = Quaternion.RotateTowards(t.localRotation, _defRot[i], deltaTime);
-        
-        t.localRotation = returnRot ;
+        Transform t = bonesTransform[i];
+        Quaternion returnRot = Quaternion.RotateTowards(t.localRotation, _defRot[i], deltaTime);
+
+        //t.localRotation = CaluculateRotate(swingDir, i) * Quaternion. * returnRot ;
+        t.localRotation = returnRot;
     }
     Quaternion CaluculateRotate(Vector3 swingDir, int i )
     {
