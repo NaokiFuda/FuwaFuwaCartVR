@@ -40,6 +40,7 @@ public class FuwaFuwaMovement : MonoBehaviour
             }
             else
             {
+                bonesLength[i] = 0;
                 _lastPos = rootBone.position;
                 _lastDir = rootBone.up;
             }
@@ -48,6 +49,8 @@ public class FuwaFuwaMovement : MonoBehaviour
         }
     }
     [SerializeField]float _deltaAdd = 1f;
+    [SerializeField] float _tolerate =0.5f;
+    [SerializeField] float _maxForce;
     void Update()
     {
         Vector3 forceDir = CaluculateSwingDirection();
@@ -57,20 +60,24 @@ public class FuwaFuwaMovement : MonoBehaviour
         for (int i = 0; i < bonesTransform.Length; i++)
         {
             var t = bonesTransform[i];
+
+            if (bonesLength[i] != 0)_lastForce[i] += force / bonesLength[i] *100;
+            else _lastForce[i] = force;
+            var forceGap = _maxForce - _lastForce[i];
+            if (_lastForce[i] < _maxForce) _lastForce[i] = Mathf.Lerp(_lastForce[i], _maxForce, forceGap / bonesLength[i] * 100);
             
+            _lastForce[i] = Mathf.Min(_tolerate, _lastForce[i]);
+            _maxForce = Mathf.Max(_maxForce, _lastForce[i]);
+            Vector4 forceDir4 = forceDir.normalized * _lastForce[i];
+            forceDir4.w = i;
+            DoFuwa(forceDir4);
+            _lastForceDir[i] = _defDir[i] - t.up;
 
             if (!isNotMoving) _delta[i] = _lastForce[i];
             _delta[i] = Mathf.Max(0, _delta[i] - 0.1f);
             //if (_delta[i] == 0) _lastForce[i] = 0;
 
-            ReFuwa(_delta[i] * _lastForceDir[i], i , _deltaAdd);
-
-            _lastForce[i] += force * bonesLength[i] / maxLength;
-            _lastForce[i] = Mathf.Min(1.5f, _lastForce[i]);
-            Vector4 forceDir4 = forceDir.normalized * _lastForce[i];
-            forceDir4.w = i;
-            DoFuwa(forceDir4);
-            _lastForceDir[i] = _defDir[i] - t.up;
+            ReFuwa(_delta[i] * _lastForceDir[i], i, _deltaAdd);
 
             _lastPos = rootBone.position;
             _lastDir = rootBone.up;
