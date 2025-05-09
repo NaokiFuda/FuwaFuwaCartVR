@@ -59,13 +59,14 @@ public class FuwaFuwaMovement : MonoBehaviour
         {
             var t = bonesTransform[i];
 
-            if (bonesLength[i] != 0)_lastForce[i] += force / bonesLength[i] *100;
+            if (bonesLength[i] != 0)_lastForce[i] += force / bonesLength[i] /10;
             else _lastForce[i] += force;
 
             float forceGap = _maxForce - _lastForce[i];
-            float fixedGap = forceGap / bonesLength[i] * 100;
-            if (_lastForce[i] < _maxForce) _lastForce[i] = Mathf.Lerp(_lastForce[i], _maxForce, fixedGap);
-            
+            float fixedGap = forceGap / bonesLength[i] /10;
+
+            if (_lastForce[i] < _maxForce){ _lastForce[i] = Mathf.Lerp(_lastForce[i], _maxForce, fixedGap);  }
+
             _lastForce[i] = Mathf.Min(_tolerate, _lastForce[i]);
             _maxForce = Mathf.Max(_maxForce, _lastForce[i]);
             Vector4 forceDir4 = forceDir.normalized * _lastForce[i];
@@ -73,12 +74,13 @@ public class FuwaFuwaMovement : MonoBehaviour
             DoFuwa(forceDir4);
             _lastForceDir[i] = _defDir[i] - t.up;
 
-            if (_maxForce - _lastForce[i] > 0.001f) { _delta[i] = _lastForce[i]/2;  }
-            else
+            if (_maxForce - _lastForce[i] < 0.0001f) 
             {
-                _delta[i] = Mathf.Max(0, _delta[i] - 0.01f / bonesLength[i] * 100);
+                _delta[i] = _lastForce[i];
+                _delta[i] = Mathf.Max(0, _delta[i] - _deltaAdd / bonesLength[i] / 10);
+                if (i == 3) Debug.Log(_deltaAdd / bonesLength[i] / 10);
                 if (_delta[i] == 0) _lastForce[i] = 0;
-
+                if (i == 3) Debug.Log("delta "+_delta[i]);
                 ReFuwa(_delta[i] * _lastForceDir[i], i, _deltaAdd);
             }
 
@@ -112,8 +114,8 @@ public class FuwaFuwaMovement : MonoBehaviour
         Transform t = bonesTransform[i];
         Quaternion returnRot = Quaternion.RotateTowards(t.localRotation, _defRot[i], deltaTime);
 
-        //t.localRotation = CaluculateRotate(swingDir, i) * Quaternion. * returnRot ;
-        t.localRotation = returnRot;
+        // t.localRotation = returnRot * Quaternion.Inverse(t.localRotation) *  CaluculateRotate(swingDir , i)  ;
+        t.localRotation = returnRot ;
     }
     Quaternion CaluculateRotate(Vector3 swingDir, int i )
     {
