@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class FuwaFuwaMovement : MonoBehaviour
@@ -11,7 +10,7 @@ public class FuwaFuwaMovement : MonoBehaviour
     Vector3 _lastPos;
     Vector3 _lastDir;
     Vector3[] _defDir;
-    Vector3[] _lastForceDir;
+    Vector3 _lastForceDir;
     float[] _lastForce;
     float[] _delta;
     Quaternion[] _defRot;
@@ -25,7 +24,6 @@ public class FuwaFuwaMovement : MonoBehaviour
         _lastForce = new float[bonesTransform.Length];
         _defDir = new Vector3[bonesTransform.Length];
         _defRot = new Quaternion[bonesTransform.Length];
-        _lastForceDir = new Vector3[bonesLength.Length];
         _delta = new float[bonesLength.Length];
         for (int i = 0; i < bonesTransform.Length; i++)
         {
@@ -34,12 +32,12 @@ public class FuwaFuwaMovement : MonoBehaviour
             {
                 var k = 1;
                 while (bonesTransform[i - k] != t.parent) k++;
-                bonesLength[i] = bonesLength[i - k] + Vector3.Distance(t.parent.position, t.position);
+                bonesLength[i] = bonesLength[i - k] + Vector3.Distance(t.parent.position, t.position)+1;
                 if (bonesLength[i]> maxLength ) maxLength = bonesLength[i];
             }
             else
             {
-                bonesLength[i] = 0;
+                bonesLength[i] = 1;
                 _lastPos = rootBone.position;
                 _lastDir = rootBone.up;
             }
@@ -53,40 +51,42 @@ public class FuwaFuwaMovement : MonoBehaviour
     void Update()
     {
         Vector3 forceDir = CaluculateSwingDirection();
-        float force = forceDir.magnitude;
-
+        float force = forceDir.magnitude*10;
+        bool isDirectionChange = Vector3.Dot(_lastForceDir.normalized, forceDir.normalized) > 0.7f;
         for (int i = 0; i < bonesTransform.Length; i++)
         {
             var t = bonesTransform[i];
 
-            if (bonesLength[i] != 0)_lastForce[i] += force / bonesLength[i] /10;
-            else _lastForce[i] += force;
-
-            float forceGap = _maxForce - _lastForce[i];
-            float fixedGap = forceGap / bonesLength[i] /10;
-
-            if (_lastForce[i] < _maxForce){ _lastForce[i] = Mathf.Lerp(_lastForce[i], _maxForce, fixedGap);  }
-
+            if (force > 0.0001f && isDirectionChange){ _lastForce[i] = 0;   }
+            _lastForce[i] += force / bonesLength[i];
+            //if (_lastForce[i] < _maxForce) { _lastForce[i] = Mathf.Lerp(_lastForce[i], _maxForce, fixedGap); if (i == 3) Debug.Log(_lastForce[i]); }
+           // if (i == 3) Debug.Log(forceGap);
             _lastForce[i] = Mathf.Min(_tolerate, _lastForce[i]);
             _maxForce = Mathf.Max(_maxForce, _lastForce[i]);
+
+            float forceGap = _maxForce - _lastForce[i];
+            float fixedGap = forceGap / bonesLength[i];
+
             Vector4 forceDir4 = forceDir.normalized * _lastForce[i];
             forceDir4.w = i;
             DoFuwa(forceDir4);
-            _lastForceDir[i] = _defDir[i] - t.up;
 
-            if (_maxForce - _lastForce[i] < 0.0001f) 
+            if(force > 0.0001f && i ==3)Debug.Log(forceGap);
+            if (forceGap < 0)
             {
+               
                 _delta[i] = _lastForce[i];
-                _delta[i] = Mathf.Max(0, _delta[i] - _deltaAdd / bonesLength[i] / 10);
-                if (i == 3) Debug.Log(_deltaAdd / bonesLength[i] / 10);
-                if (_delta[i] == 0) _lastForce[i] = 0;
-                if (i == 3) Debug.Log("delta "+_delta[i]);
-                ReFuwa(_delta[i] * _lastForceDir[i], i, _deltaAdd);
+                _delta[i] = Mathf.Max(0, _delta[i] - _deltaAdd / bonesLength[i]);
+                //if (i == 3) Debug.Log(_deltaAdd / bonesLength[i] );
+                if (_delta[i] == 0) { _lastForce[i] = 0;  }
+                //if (i == 3) Debug.Log("delta "+_delta[i]);
+                ReFuwa(_delta[i] * _lastForceDir, i, _deltaAdd);
             }
 
-            _lastPos = rootBone.position;
-            _lastDir = rootBone.up;
         }
+        _lastPos = rootBone.position;
+        _lastDir = rootBone.up;
+        _lastForceDir = forceDir;
     }
     
     Vector3 CaluculateSwingDirection()
