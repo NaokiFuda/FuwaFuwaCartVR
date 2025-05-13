@@ -832,6 +832,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1874608093}
   - component: {fileID: 1874608092}
+  - component: {fileID: 1874608094}
   m_Layer: 0
   m_Name: TheCar
   m_TagString: Untagged
@@ -886,6 +887,48 @@ Transform:
   - {fileID: 297430133}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1874608094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1874608091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90ef4f8f6822e1c41971689206de47b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _moveForward:
+    actionPath: /actions/default/in/MoveForward
+    needsReinit: 0
+  _moveBackward:
+    actionPath: /actions/default/in/MoveBackward
+    needsReinit: 0
+  _moveRightward:
+    actionPath: /actions/default/in/MoveRightward
+    needsReinit: 0
+  _moveLeftward:
+    actionPath: /actions/default/in/MoveLeftward
+    needsReinit: 0
+  _moveAction:
+    actionPath: /actions/default/in/Move
+    needsReinit: 0
+  speed: 8
+  _turnRight:
+    actionPath: /actions/default/in/SmoothTurnRight
+    needsReinit: 0
+  _turnLeft:
+    actionPath: /actions/default/in/SmoothTurnLeft
+    needsReinit: 0
+  _turnAction:
+    actionPath: /actions/default/in/Turn
+    needsReinit: 0
+  _jump:
+    actionPath: /actions/default/in/Jump
+    needsReinit: 0
+  isFootFollowHead: 0
+  leanAngle: 0.05
 --- !u!1 &2146024090
 GameObject:
   m_ObjectHideFlags: 0
