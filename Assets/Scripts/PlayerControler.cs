@@ -10,10 +10,15 @@ using UnityEngine.Events;
 
 public class PlayerControler : MonoBehaviour
 {
-    Action<Vector3> moveMethod;
-    Action jumpMethod;
+    public Action<Vector3> moveMethod;
+    public Action jumpMethod;
     [SerializeField] Transform playerLeftHand;
     [SerializeField] Transform playerRightHand;
+
+    [SerializeField] Transform[] desktopHands;
+    [SerializeField] Transform glabPoint;
+
+    [SerializeField] FuwaFuwaMovement fuwaFuwaMovement;
 
     public SteamVR_Action_Boolean _moveForward = SteamVR_Input.GetBooleanAction("MoveForward");
     public SteamVR_Action_Boolean _moveBackward = SteamVR_Input.GetBooleanAction("MoveBackward");
@@ -41,8 +46,10 @@ public class PlayerControler : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         player = GetComponent<Player>();
         col = GetComponent<CapsuleCollider>();
-        playerLeftHand.parent = player.leftHand.transform;
-        playerRightHand.parent = player.rightHand.transform;
+
+        Cursor.visible = false;           // カーソルを非表示
+        Cursor.lockState = CursorLockMode.Locked;  // 画面中央にロック（任意）
+
     }
     void Update()
     {
@@ -51,7 +58,7 @@ public class PlayerControler : MonoBehaviour
         bool leftTurnInput = false;
         Vector2 turnInput = Vector2.zero;
 
-        if (XRSettings.isDeviceActive)
+        if (SteamVR.active)
         {
 
             Vector2 input = _moveAction.GetAxis(SteamVR_Input_Sources.LeftHand);
@@ -72,7 +79,7 @@ public class PlayerControler : MonoBehaviour
             else if (input.x != 0 || input.y != 0)
             {
                 moveDirection = player.hmdTransform.forward * input.y;
-                moveDirection += player.hmdTransform.right * input.x;
+                moveDirection = player.hmdTransform.right * input.x;
             }
             else moveDirection = Vector3.zero;
 
@@ -96,7 +103,7 @@ public class PlayerControler : MonoBehaviour
         var verticalInput = Input.GetAxis("Vertical");
         var horizontalInput = Input.GetAxis("Horizontal");
         if (verticalInput != 0) moveDirection.z = verticalInput;
-        if(horizontalInput != 0) moveDirection.x += horizontalInput;
+        if(horizontalInput != 0) moveDirection.x = horizontalInput;
 
         var mouseMovement = Input.GetAxis("Mouse X");
         if (mouseMovement != 0) Turn(mouseMovement * mouseSensitivity);
@@ -111,10 +118,22 @@ public class PlayerControler : MonoBehaviour
         {
             Turn(turnInput.x);
         }
+
+        bool leftClickHold = Input.GetMouseButton(0);
+        bool leftClickUp = Input.GetMouseButtonUp(0);
+        if(leftClickHold)
+        {
+            if (SteamVR.active)
+                fuwaFuwaMovement.SetHold(glabPoint, playerLeftHand.position, playerLeftHand.rotation);
+            else
+                fuwaFuwaMovement.SetHold(glabPoint, Input.mousePosition);
+        }
+        if(leftClickUp)
+            fuwaFuwaMovement.SetRelease();
     }
     Vector3 moveDirection;
     bool isMove;
-    [SerializeField] float mouseSensitivity = 0.03f;
+    [SerializeField] float mouseSensitivity = 0.5f;
 
     private void FixedUpdate()
     {
