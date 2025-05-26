@@ -18,6 +18,11 @@ public class FuwaFuwaMovement : MonoBehaviour
     float[] _deltaRet;
     Vector3[] _rebounceDir;
     Quaternion[] _defRot;
+
+    int grabIndex = -1;
+    [SerializeField] Transform[] grabPoint;
+    Transform[] _grabedParent;
+    
     float maxLength;
 
     void Start()
@@ -33,6 +38,8 @@ public class FuwaFuwaMovement : MonoBehaviour
         _doBounce = new bool[bonesTransform.Length];
         _rebounceDir = new Vector3[bonesTransform.Length];
         _deltaRet = new float[bonesTransform.Length];
+        _grabedParent = new Transform[grabPoint.Length];
+
         for (int i = 0; i < bonesTransform.Length; i++)
         {
             var t = bonesTransform[i];
@@ -166,12 +173,12 @@ public class FuwaFuwaMovement : MonoBehaviour
         return Quaternion.Slerp(fixedCurrentRot, targetRot, hardnessStrength);
     }
 
-    int grabIndex = -1;
-    public void SetHold(Transform glabedTransform,Vector3 glabPos, Quaternion glabRot)
+    
+    public void SetHold(Transform glabedTransform,Vector3 glabPos, Transform glabHand)
     {
         if (grabIndex < 0)
-            for (int i = 0; i < bonesTransform.Length; i++)
-                if (bonesTransform[i] == glabedTransform) { grabIndex = i;  break; }
+            for (int i = 0; i < grabPoint.Length; i++)
+                if (grabPoint[i] == glabedTransform) { grabIndex = i; _grabedParent[i] = grabPoint[i].parent;   break; }
 
     }
     public void SetHold(Transform glabedTransform, Vector3 glabPos)

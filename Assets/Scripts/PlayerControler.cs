@@ -124,7 +124,7 @@ public class PlayerControler : MonoBehaviour
         if(leftClickHold)
         {
             if (SteamVR.active)
-                fuwaFuwaMovement.SetHold(glabPoint, playerLeftHand.position, playerLeftHand.rotation);
+                fuwaFuwaMovement.SetHold(glabPoint, playerLeftHand.position, playerLeftHand);
             else
                 fuwaFuwaMovement.SetHold(glabPoint, Input.mousePosition);
         }
