@@ -65,58 +65,58 @@ public class FuwaFuwaMovement : MonoBehaviour
         bool isDirectionChange = Vector3.Dot(_lastForceDir.normalized, forceDir.normalized) > 0.7f;
         if (grabIndex >= 0)
         {
-
+            FuwaFuwa( grabIndex ,forceDir, force, isDirectionChange);
         }
         else
         {
-            for (int i = 0; i < bonesTransform.Length; i++)
-            {
-                var t = bonesTransform[i];
-
-                if (force > 0.0001f && isDirectionChange) { _lastForce[i] = 0; }
-                _lastForce[i] += force / bonesLength[i];
-
-                _lastForce[i] = Mathf.Min(_tolerate, _lastForce[i]);
-                _maxForce = Mathf.Max(_maxForce, _lastForce[i]);
-
-                float forceGap = _maxForce - _lastForce[i];
-
-                Vector4 forceDir4 = forceDir.normalized * _lastForce[i];
-                forceDir4.w = i;
-                DoFuwa(forceDir4);
-
-                if (_lastGap[i] - forceGap > 0 && force > 0.0001f) { _delta[i] = _lastForce[i]; _deltaRet[i] = _lastForce[i]; _rebounceDir[i] = (_defDir[i] - t.up).normalized; _doBounce[i] = true; }
-                if (_lastGap[i] - forceGap > 0 && _delta[i] == 0) _maxForce = 0;
-                if (forceGap < 0.1f)
-                {
-                    if (_doBounce[i])
-                    {
-                        _delta[i] = Mathf.Max(0, _delta[i] - _deltaAdd);
-
-
-
-                    }
-                    if (_delta[i] == 0) { _lastForce[i] = 0; _doBounce[i] = false; }
-                    //if (i == 3) Debug.Log(_delta[i] * rebounceDir + " " + (_delta[i] * rebounceDir).magnitude);
-                    //if (i == 3) Debug.Log("delta " + _delta[i]);
-                    // if (i == 3) Debug.Log(_lastForce[i] + " " + _delta[i]);
-                    ReFuwa(_delta[i] * _rebounceDir[i], i, _deltaRet[i] - _delta[i]);
-                }
-
-                if (_lastForce[i] < _maxForce) { _lastForce[i] = Mathf.Lerp(_lastForce[i], _maxForce, 0.1f); }
-                //if (i == 3) Debug.Log(forceGap);
-
-                _lastGap[i] = forceGap;
-            }
+            FuwaFuwa( 0, forceDir, force, isDirectionChange);
         }
         
         _lastPos = rootBone.position;
         _lastDir = rootBone.up;
         _lastForceDir = forceDir;
     }
-    void FuwaFuwa()
+    void FuwaFuwa(int rootIndex ,Vector3 forceDir, float force, bool isDirectionChange)
     {
+        for (int i = rootIndex; i < bonesTransform.Length; i++)
+        {
+            var t = bonesTransform[i];
 
+            if (force > 0.0001f && isDirectionChange) { _lastForce[i] = 0; }
+            _lastForce[i] += force / bonesLength[i];
+
+            _lastForce[i] = Mathf.Min(_tolerate, _lastForce[i]);
+            _maxForce = Mathf.Max(_maxForce, _lastForce[i]);
+
+            float forceGap = _maxForce - _lastForce[i];
+
+            Vector4 forceDir4 = forceDir.normalized * _lastForce[i];
+            forceDir4.w = i;
+            DoFuwa(forceDir4);
+
+            if (_lastGap[i] - forceGap > 0 && force > 0.0001f) { _delta[i] = _lastForce[i]; _deltaRet[i] = _lastForce[i]; _rebounceDir[i] = (_defDir[i] - t.up).normalized; _doBounce[i] = true; }
+            if (_lastGap[i] - forceGap > 0 && _delta[i] == 0) _maxForce = 0;
+            if (forceGap < 0.1f)
+            {
+                if (_doBounce[i])
+                {
+                    _delta[i] = Mathf.Max(0, _delta[i] - _deltaAdd);
+
+
+
+                }
+                if (_delta[i] == 0) { _lastForce[i] = 0; _doBounce[i] = false; }
+                //if (i == 3) Debug.Log(_delta[i] * rebounceDir + " " + (_delta[i] * rebounceDir).magnitude);
+                //if (i == 3) Debug.Log("delta " + _delta[i]);
+                // if (i == 3) Debug.Log(_lastForce[i] + " " + _delta[i]);
+                ReFuwa(_delta[i] * _rebounceDir[i], i, _deltaRet[i] - _delta[i]);
+            }
+
+            if (_lastForce[i] < _maxForce) { _lastForce[i] = Mathf.Lerp(_lastForce[i], _maxForce, 0.1f); }
+            //if (i == 3) Debug.Log(forceGap);
+
+            _lastGap[i] = forceGap;
+        }
     }
     
     Vector3 CaluculateSwingDirection()
@@ -179,6 +179,7 @@ public class FuwaFuwaMovement : MonoBehaviour
         if (grabIndex < 0)
             for (int i = 0; i < bonesTransform.Length; i++)
                 if (bonesTransform[i] == glabedTransform) { grabIndex = i; break; }
+
 
     }
     public void SetRelease()

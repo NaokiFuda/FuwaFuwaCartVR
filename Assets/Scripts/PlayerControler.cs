@@ -129,7 +129,7 @@ public class PlayerControler : MonoBehaviour
                 fuwaFuwaMovement.SetHold(glabPoint, Input.mousePosition);
         }
         if(leftClickUp)
-            fuwaFuwaMovement.SetRelease();
+            { fuwaFuwaMovement.SetRelease();  }
     }
     Vector3 moveDirection;
     bool isMove;
