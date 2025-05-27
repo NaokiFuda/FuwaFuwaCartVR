@@ -34,6 +34,8 @@ public class PlayerControler : MonoBehaviour
     public SteamVR_Action_Vector2 _turnAction = SteamVR_Input.GetVector2Action("Turn");
 
     public SteamVR_Action_Boolean _jump = SteamVR_Input.GetBooleanAction("Jump");
+
+    public SteamVR_Action_Boolean _grab = SteamVR_Input.GetBooleanAction("GrabGrip");
     Rigidbody rb;
     CapsuleCollider col;
     Player player;
@@ -121,10 +123,15 @@ public class PlayerControler : MonoBehaviour
 
         bool leftClickHold = Input.GetMouseButton(0);
         bool leftClickUp = Input.GetMouseButtonUp(0);
+        if (SteamVR.active)
+        {
+            leftClickHold = _grab.GetStateDown(SteamVR_Input_Sources.RightHand);
+            leftClickUp = _grab.GetStateUp(SteamVR_Input_Sources.RightHand);
+        }
         if(leftClickHold)
         {
             if (SteamVR.active)
-                fuwaFuwaMovement.SetHold(glabPoint, playerLeftHand.position, playerLeftHand);
+                fuwaFuwaMovement.SetHold(glabPoint, playerRightHand.position, playerRightHand);
             else
                 fuwaFuwaMovement.SetHold(glabPoint, Input.mousePosition);
         }

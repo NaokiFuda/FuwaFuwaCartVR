@@ -22,7 +22,11 @@ public class FuwaFuwaMovement : MonoBehaviour
     int grabIndex = -1;
     [SerializeField] Transform[] grabPoint;
     Transform[] _grabedParent;
-    
+
+    Vector2 _screenCenter;
+    private int lastScreenWidth;
+    private int lastScreenHeight;
+
     float maxLength;
 
     void Start()
@@ -82,8 +86,13 @@ public class FuwaFuwaMovement : MonoBehaviour
         _lastPos = rootBone.position;
         _lastDir = rootBone.up;
         _lastForceDir = forceDir;
+
+        if(lastScreenHeight != Screen.height || lastScreenWidth != Screen.width) _screenCenter = new Vector2(Screen.width / 2, Screen.height / 2);
+        lastScreenHeight = Screen.height;
+        lastScreenWidth = Screen.width;
+
     }
-    void FuwaFuwa(int rootIndex ,Vector3 forceDir, float force, bool isDirectionChange)
+    void FuwaFuwa( in int rootIndex , in Vector3 forceDir, in float force, in bool isDirectionChange)
     {
         for (int i = rootIndex; i < bonesTransform.Length; i++)
         {
@@ -138,7 +147,7 @@ public class FuwaFuwaMovement : MonoBehaviour
     [SerializeField] AnimationCurve hardness = AnimationCurve.Constant(timeStart: 0.05f, timeEnd: 0.3f, value: 1f);
     [SerializeField] float angleLimit = 90;
     
-    void DoFuwa(Vector4 swingDir4)
+    void DoFuwa(in Vector4 swingDir4)
     {
         var i = (int)swingDir4.w;
         var t = bonesTransform[i];
@@ -146,7 +155,7 @@ public class FuwaFuwaMovement : MonoBehaviour
     }
 
     
-    void ReFuwa(Vector3 swingDir, int i , float deltaTime)
+    void ReFuwa(in Vector3 swingDir, in int i , in float deltaTime)
     {
         Transform t = bonesTransform[i];
         Quaternion returnRot = Quaternion.RotateTowards(t.localRotation, _defRot[i], deltaTime);
@@ -154,7 +163,7 @@ public class FuwaFuwaMovement : MonoBehaviour
         // t.localRotation =  returnRot * Quaternion.Inverse(t.localRotation) * CaluculateRotate(swingDir, i);
         t.localRotation = returnRot ;
     }
-    Quaternion CaluculateRotate(Vector3 swingDir, int i )
+    Quaternion CaluculateRotate(in Vector3 swingDir, in int i )
     {
         Transform t = bonesTransform[i];
 
@@ -173,24 +182,60 @@ public class FuwaFuwaMovement : MonoBehaviour
         return Quaternion.Slerp(fixedCurrentRot, targetRot, hardnessStrength);
     }
 
-    
-    public void SetHold(Transform glabedTransform,Vector3 glabPos, Transform glabHand)
+    [SerializeField] float glabDistance = 0.3f;
+    public void SetHold(in Transform glabedTransform, in Vector3 glabPos, in Transform glabHand)
     {
+        _isHold = true;
         if (grabIndex < 0)
             for (int i = 0; i < grabPoint.Length; i++)
-                if (grabPoint[i] == glabedTransform) { grabIndex = i; _grabedParent[i] = grabPoint[i].parent;   break; }
+            {
+                if ((grabPoint[i].position - glabedTransform.position).sqrMagnitude < glabDistance * glabDistance) 
+                {
+                    for (int j = 0; j < bonesTransform.Length; i++)
+                        if (grabPoint[i] == bonesTransform[j])
+                        {
+                            grabIndex = j;
+                            break;
+                        }
+                    grabPoint[i].parent = glabHand;
+                    _grabedParent[i] = grabPoint[i].parent;
+                    break;
+                }
+            }
 
     }
-    public void SetHold(Transform glabedTransform, Vector3 glabPos)
+    
+    public void SetHold(in Transform glabedTransform, in Vector3 glabPos)
     {
+        _isHold = true;
         if (grabIndex < 0)
-            for (int i = 0; i < bonesTransform.Length; i++)
-                if (bonesTransform[i] == glabedTransform) { grabIndex = i; break; }
-
+            for(int i = 0; i < grabPoint.Length; i++)
+            {
+                if (grabPoint[i].position.x - _screenCenter.x < glabDistance )
+                    if(grabPoint[i].position.y - _screenCenter.y < glabDistance || grabPoint[i].position.y - _screenCenter.y * 2 / 4 < glabDistance || grabPoint[i].position.y - _screenCenter.y * 2 * 3 / 4 < glabDistance)
+                    {
+                        for (int j = 0; j < bonesTransform.Length; j++)
+                        {
+                            Debug.Log(j);
+                            if (grabPoint[i] == bonesTransform[j])
+                            {
+                                grabIndex = j;
+                                Debug.Log(grabIndex);
+                                break;
+                            }
+                        }
+                        break;
+                    }
+            }
 
     }
+    bool _isHold;
     public void SetRelease()
     {
+        if (!_isHold) return;
+        _isHold = false;
+        for (int i = 0; i < grabPoint.Length; i++)
+            if (grabPoint[i] == bonesTransform[grabIndex]) grabPoint[i].parent = _grabedParent[i];
         grabIndex = -1;
     }
 }

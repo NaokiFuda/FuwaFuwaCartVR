@@ -212,6 +212,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rootBone: {fileID: 90765157}
+  grabPoint:
+  - {fileID: 1993763933}
+  - {fileID: 2034123148}
+  - {fileID: 1282931106}
   _deltaAdd: 0.01
   _tolerate: 1.5
   _maxForce: 1.5
@@ -250,6 +254,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   angleLimit: 90
+  glabDistance: 0.3
 --- !u!4 &90765157 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -5913172463669914825, guid: 46f36935b83ec3247aeba60a0661daa0, type: 3}
@@ -809,6 +814,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rootBone: {fileID: 0}
+  grabPoint: []
   _deltaAdd: 0.1
   _tolerate: 1
   _maxForce: 0
@@ -838,6 +844,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   angleLimit: 90
+  glabDistance: 0.3
 --- !u!4 &950044286 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 655877715496387086, guid: 46f36935b83ec3247aeba60a0661daa0, type: 3}
@@ -1463,6 +1470,11 @@ MonoBehaviour:
   getLogMessage: 0
   moterForce: 1000
   steerAngle: 45
+--- !u!4 &1993763933 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -5234448375175369897, guid: 46f36935b83ec3247aeba60a0661daa0, type: 3}
+  m_PrefabInstance: {fileID: 143393572}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1999060145 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7988614350880459430, guid: c53cec26c3941bc4ca3154446e6ece2f, type: 3}
@@ -1481,6 +1493,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rootBone: {fileID: 0}
+  grabPoint: []
   _deltaAdd: 0.1
   _tolerate: 1
   _maxForce: 0
@@ -1510,6 +1523,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   angleLimit: 90
+  glabDistance: 0.3
+--- !u!4 &2034123148 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2917289242402929547, guid: 46f36935b83ec3247aeba60a0661daa0, type: 3}
+  m_PrefabInstance: {fileID: 143393572}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2043145539 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -6849256395834940829, guid: 46f36935b83ec3247aeba60a0661daa0, type: 3}
