@@ -49,8 +49,9 @@ public class PlayerControler : MonoBehaviour
         player = GetComponent<Player>();
         col = GetComponent<CapsuleCollider>();
 
-        Cursor.visible = false;           // カーソルを非表示
-        Cursor.lockState = CursorLockMode.Locked;  // 画面中央にロック（任意）
+        Cursor.lockState = CursorLockMode.Confined;
+        //Cursor.visible = false;           // カーソルを非表示
+        //Cursor.lockState = CursorLockMode.Locked;  // 画面中央にロック（任意）
 
     }
     void Update()
@@ -128,7 +129,7 @@ public class PlayerControler : MonoBehaviour
             leftClickHold = _grab.GetStateDown(SteamVR_Input_Sources.RightHand);
             leftClickUp = _grab.GetStateUp(SteamVR_Input_Sources.RightHand);
         }
-        if(leftClickHold)
+        if (leftClickHold)
         {
             if (SteamVR.active)
                 fuwaFuwaMovement.SetHold(glabPoint, playerRightHand.position, playerRightHand);
@@ -149,7 +150,7 @@ public class PlayerControler : MonoBehaviour
             moveMethod?.Invoke(moveDirection);
         }
     }
-    private void Turn(float angle)
+    private void Turn(in float angle)
     {
         player.transform.RotateAround(player.hmdTransform.position, Vector3.up, angle);
     }

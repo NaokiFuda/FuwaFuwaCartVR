@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Valve.VR;
 
 public class FuwaFuwaMovement : MonoBehaviour
 {
@@ -23,9 +24,6 @@ public class FuwaFuwaMovement : MonoBehaviour
     [SerializeField] Transform[] grabPoint;
     Transform[] _grabedParent;
 
-    Vector2 _screenCenter;
-    private int lastScreenWidth;
-    private int lastScreenHeight;
 
     float maxLength;
 
@@ -87,12 +85,9 @@ public class FuwaFuwaMovement : MonoBehaviour
         _lastDir = rootBone.up;
         _lastForceDir = forceDir;
 
-        if(lastScreenHeight != Screen.height || lastScreenWidth != Screen.width) _screenCenter = new Vector2(Screen.width / 2, Screen.height / 2);
-        lastScreenHeight = Screen.height;
-        lastScreenWidth = Screen.width;
 
     }
-    void FuwaFuwa( in int rootIndex , in Vector3 forceDir, in float force, in bool isDirectionChange)
+    void FuwaFuwa(in int rootIndex , in Vector3 forceDir, in float force, in bool isDirectionChange)
     {
         for (int i = rootIndex; i < bonesTransform.Length; i++)
         {
@@ -209,31 +204,40 @@ public class FuwaFuwaMovement : MonoBehaviour
     {
         _isHold = true;
         if (grabIndex < 0)
-            for(int i = 0; i < grabPoint.Length; i++)
+        {
+            if (glabPos.y < Screen.height  / 4)
             {
-                if (grabPoint[i].position.x - _screenCenter.x < glabDistance )
-                    if(grabPoint[i].position.y - _screenCenter.y < glabDistance || grabPoint[i].position.y - _screenCenter.y * 2 / 4 < glabDistance || grabPoint[i].position.y - _screenCenter.y * 2 * 3 / 4 < glabDistance)
-                    {
-                        for (int j = 0; j < bonesTransform.Length; j++)
-                        {
-                            Debug.Log(j);
-                            if (grabPoint[i] == bonesTransform[j])
-                            {
-                                grabIndex = j;
-                                Debug.Log(grabIndex);
-                                break;
-                            }
-                        }
-                        break;
-                    }
+                 SetGrabIndex(0);
             }
+            else if (glabPos.y < Screen.height * 2 / 4)
+            {
+                SetGrabIndex(1);
+            }
+            else
+            {
+                SetGrabIndex(2);
+            }
+        }
+    }
 
+    void SetGrabIndex(in int index)
+    {
+        for (int i = 0; i < bonesTransform.Length; i++)
+        {
+            if (grabPoint[index] == bonesTransform[i])
+            {
+                grabIndex = i;
+                break;
+            }
+        }
     }
     bool _isHold;
     public void SetRelease()
     {
+        Debug.Log(grabIndex);
         if (!_isHold) return;
         _isHold = false;
+        if(SteamVR.active)
         for (int i = 0; i < grabPoint.Length; i++)
             if (grabPoint[i] == bonesTransform[grabIndex]) grabPoint[i].parent = _grabedParent[i];
         grabIndex = -1;
