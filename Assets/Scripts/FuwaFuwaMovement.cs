@@ -192,7 +192,6 @@ public class FuwaFuwaMovement : MonoBehaviour
         return Quaternion.Slerp(fixedCurrentRot, targetRot, hardnessStrength);
     }
 
-    [SerializeField] float glabDistance = 0.3f;
     public void SetHold(in Vector3 glabPos, in Transform glabHand)
     {
         _isHold = true;
