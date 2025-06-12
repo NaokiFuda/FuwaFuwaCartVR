@@ -70,7 +70,13 @@ public class FuwaFuwaMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        Vector3 forceDir = CaluculateSwingDirection();
+        Transform root = rootBone;
+        if (grabIndex >= 0)
+        {
+            if (SteamVR.active)
+                root = _grabHandTransform;
+        }
+        Vector3 forceDir = CaluculateSwingDirection(root);
         float force = forceDir.magnitude;
         if (grabIndex >= 0)
         {
@@ -81,8 +87,8 @@ public class FuwaFuwaMovement : MonoBehaviour
             FuwaFuwa(0, forceDir, force);
         }
 
-        _lastPos = rootBone.position;
-        _lastDir = rootBone.up;
+        _lastPos = root.position;
+        _lastDir = root.up;
     }
 
     void FuwaFuwa(in int rootIndex, in Vector3 forceDir, in float force)
@@ -125,10 +131,10 @@ public class FuwaFuwaMovement : MonoBehaviour
     }
 
 
-    Vector3 CaluculateSwingDirection()
+    Vector3 CaluculateSwingDirection(Transform root)
     {
-        Vector3 swingDir = (rootBone.position - _lastPos);
-        swingDir += rootBone.up - _lastDir;
+        Vector3 swingDir = (root.position - _lastPos);
+        swingDir += root.up - _lastDir;
 
         return -swingDir;
     }
@@ -192,10 +198,13 @@ public class FuwaFuwaMovement : MonoBehaviour
         return Quaternion.Slerp(fixedCurrentRot, targetRot, hardnessStrength);
     }
 
+    Transform _grabHandTransform;
     public void SetHold(in Vector3 glabPos, in Transform glabHand)
     {
-        _isHold = true;
         if (grabIndex < 0)
+        {
+            _grabHandTransform = glabHand;
+
             for (int i = 0; i < grabPoint.Length; i++)
             {
                 if ((grabPoint[i].position - glabPos).sqrMagnitude < glabDistance * glabDistance)
@@ -209,13 +218,14 @@ public class FuwaFuwaMovement : MonoBehaviour
                     break;
                 }
             }
+        }
+            
     }
-
-    public void SetHold(in Transform glabedTransform, in Vector3 glabPos)
+    public void SetHold( in Vector3 glabPos)
     {
-        _isHold = true;
         if (grabIndex < 0)
         {
+            _grabHandTransform = rootBone; // 仮に入れてる。うまいこと仮想的にマウスのtransformを設定してその動きに応じて頭を揺らしたい
             if (glabPos.y < Screen.height  / 4)
             {
                  SetGrabIndex(0);
@@ -242,12 +252,9 @@ public class FuwaFuwaMovement : MonoBehaviour
             }
         }
     }
-    bool _isHold;
     public void SetRelease()
     {
-        Debug.Log(grabIndex);
-        if (!_isHold) return;
-        _isHold = false;
+        if (grabIndex < 0) return;
         if(SteamVR.active)
         for (int i = 0; i < grabPoint.Length; i++)
             if (grabPoint[i] == bonesTransform[grabIndex]) grabPoint[i].parent = _grabedParent[i];

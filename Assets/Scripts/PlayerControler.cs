@@ -16,7 +16,6 @@ public class PlayerControler : MonoBehaviour
     [SerializeField] Transform playerRightHand;
 
     [SerializeField] Transform[] desktopHands;
-    [SerializeField] Transform glabPoint;
 
     [SerializeField] FuwaFuwaMovement fuwaFuwaMovement;
 
@@ -134,7 +133,7 @@ public class PlayerControler : MonoBehaviour
             if (SteamVR.active)
                 fuwaFuwaMovement.SetHold(playerRightHand.position, playerRightHand);
             else
-                fuwaFuwaMovement.SetHold(glabPoint, Input.mousePosition);
+                fuwaFuwaMovement.SetHold(Input.mousePosition);
         }
         if(leftClickUp)
             { fuwaFuwaMovement.SetRelease();  }
